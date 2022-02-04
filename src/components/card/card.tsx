@@ -1,34 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Card, Button } from "react-bootstrap";
-// import styles from "./card.scss";
-type  itemType={
-  id:number;
-  title: string;
-  description: string;
-  img:any;
-  price:number
-}
-interface itemProps {
-  item: itemType,
-}
-const CardItem: React.FC<itemProps> = ({ item }): JSX.Element => {
+import { Card, Button, Row } from "react-bootstrap";
+import { itemInterface } from "../../constants/interface";
+import { subStrText } from "../../utilities/func";
+
+const CardItem = (props: {
+  item: itemInterface;
+  fullDescription?: boolean;
+  onClick: () => void;
+}): JSX.Element => {
+  const { item, fullDescription, onClick } = props;
   return (
-    <Link to="">
-      <Card >
-        <Card.Img variant="top" src={item.img} />
-        <Card.Body>
+    <Card className="mb-3">
+      <Card.Img variant="top" src={item.img} className="max-width align-self-center" />
+      <Card.Body className="cart-height">
+        <Link to={`/resorts/${item.id}`}>
           <Card.Title>{item.title}</Card.Title>
-          <Card.Text>{item.description}</Card.Text>
-          <div className="row">
-            <span>{item.price}</span>
-            <Button size="sm" variant="primary">
-              add to bucket
-            </Button>
-          </div>
-        </Card.Body>
-      </Card>
-    </Link>
+          <Card.Text>
+            {fullDescription
+              ? item.description
+              : subStrText(item.description, 40)}
+          </Card.Text>
+        </Link>
+        <div className="row">
+           <p> <span>price:</span><span>{item.price}$</span></p>
+          <Button size="sm" variant="primary" onClick={onClick}>
+            add to bucket
+          </Button>
+        </div>
+      </Card.Body>
+    </Card>
   );
 };
 

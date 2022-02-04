@@ -9,7 +9,7 @@ function App() {
     <BrowserRouter>
     <Routes>
       <Route  path="/" element={<ResortsList />} />
-      <Route path="/store"  element={<ResortDetails />}/>
+      <Route path="/resorts/:id"  element={<ResortDetails />}/>
       <Route path="/bucket"element={<Bucket />} />
     </Routes>
   </BrowserRouter>

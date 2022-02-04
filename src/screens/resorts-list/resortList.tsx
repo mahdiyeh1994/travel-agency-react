@@ -1,62 +1,110 @@
-import React from "react";
-import { Navbar, Container, Nav, Col, Row } from "react-bootstrap";
-import img from "../../assets/images/browse-pic-1.jpg";
-import data from "../../constants/data.json";
-import { CardItem } from "../../components";
+import React, { useEffect, useState } from "react";
+import { Navbar, Container, Card, Col, Row } from "react-bootstrap";
+import {data} from "../../constants/data";
+import { CardItem, Header, FilterBox, PaginationBox } from "../../components";
+import { itemInterface } from "../../constants/interface";
+import { useLocalStorage } from "../../hooks/localStorage";
+import { alphabeticalSort, numberSort } from "../../utilities/func";
+
+var _ = require("lodash");
 
 function ResortsList() {
-  const dataArr = JSON.stringify(data);
-  console.log(data[0].title);
+  const [sort, setSort] = useState("1");
+  const itemsType: any[] = [];
+  const [items, setItems] = useState(itemsType);
+  const [currentPage, setCurrentPage] = useState(1);
+  const postPerPage = 20;
+  const [storeInBucket, setStoreInBucket] = useLocalStorage("bucket", "");
+  //add to bucket
+  const addToBucket = (item: itemInterface) => {
+    setStoreInBucket([...storeInBucket, item]);
+  };
+  //filter
+  const handleFilter = (item: any) => {
+    if (item.title && item.price) {
+      let filterData = data.filter(
+        (obj) => obj.title === item.title && obj.price === parseInt(item.price)
+      );
+      setItems(filterData);
+    } else {
+      let filterData = data.filter(
+        (obj) => obj.title === item.title || obj.price === parseInt(item.price)
+      );
+      setItems(filterData);
+    }
+    if (!item.title && !item.price) {
+      setItems(data);
+    }
+  };
+  //pagination
+  const handlePagination = (num: number) => {
+    setCurrentPage(num);
+  };
+
+  useEffect(() => {
+    if (parseInt(sort) === 1) {
+      alphabeticalSort(data);
+    } else {
+      numberSort(data);
+    }
+    const indexOfLastPost = currentPage * postPerPage;
+    const indexOfFirstPost = indexOfLastPost - postPerPage;
+    const currentPosts = data.slice(indexOfFirstPost, indexOfLastPost);
+    setItems(currentPosts);
+  }, [currentPage, sort]);
+
+  //sort
+  const handleSort = (e: any) => {
+    setSort(e.target.value);
+  };
+
   return (
     <>
-      <Navbar collapseOnSelect expand="lg" bg="light" variant="light">
-        <Container>
-          <Navbar.Brand href="#home">Travel Agency</Navbar.Brand>
-          <Navbar.Collapse
-            id="responsive-navbar-nav"
-            className="justify-content-end"
-          >
-            <Nav>
-              <Nav.Link href="#deets">
-                <i className="fas fa-shopping-basket"></i>
-              </Nav.Link>
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
-      <body>
+      <Header bucket />
         <Container>
           <Row className="justify-content-space-between">
-           <div className="col-md-3">
-           <h1>Live anywhere</h1>
-            <p>Keep calm & travel on</p>
-           </div>
+            <div className="col-md-3">
+              <h1>Live anywhere</h1>
+              <p>Keep calm & travel on</p>
+            </div>
             <div className="form-group col-md-3">
               <label htmlFor="category-select" className="form-label">
                 sort
               </label>
-              <select
-                className="form-select"
-                // data-testid="category-select"
-                // {...setValue("category", details.category)}
-                // {...register("category")}
-              >
-                <option value="mobile">title</option>
-                <option value="book">price</option>
+              <select className="form-select" onChange={handleSort}>
+                <option value="1">title</option>
+                <option value="2">price</option>
               </select>
             </div>
           </Row>
-          <Row xs={1} md={3}>
-            {data.map((item) => {
-              return (
-                <Col>
-                  <CardItem item={item} key={item.id} />
-                </Col>
-              );
-            })}
+          <Row>
+            <Col md={3} xs={12}>
+              <aside>
+                <FilterBox onSubmit={handleFilter} />
+              </aside>
+            </Col>
+            <Col md={9} xs={12}>
+              <Row xs={1} md={3}>
+                {items.map((item) => {
+                  return (
+                    // <Col>
+                      <CardItem
+                        item={item}
+                        key={item ? item.id : ""}
+                        onClick={() => addToBucket(item)}
+                      />
+                    // </Col>
+                  );
+                })}
+              </Row>
+            </Col>
           </Row>
+           <PaginationBox
+            totalPost={data.length}
+            postPerPage={postPerPage}
+            onClick={handlePagination}
+          />
         </Container>
-      </body>
     </>
   );
 }
