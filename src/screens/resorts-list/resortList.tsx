@@ -6,8 +6,6 @@ import { itemInterface } from "../../constants/interface";
 import { useLocalStorage } from "../../hooks/localStorage";
 import { alphabeticalSort, numberSort } from "../../utilities/func";
 
-var _ = require("lodash");
-
 function ResortsList() {
   const [sort, setSort] = useState("1");
   const itemsType: any[] = [];
